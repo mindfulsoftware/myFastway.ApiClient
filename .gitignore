@@ -328,3 +328,6 @@ ASALocalRun/
 
 # MFractors (Xamarin productivity tool) working folder 
 .mfractor/
+
+# Solution Specific
+myFastway.ApiClient.Tests/appsettings-local.json
