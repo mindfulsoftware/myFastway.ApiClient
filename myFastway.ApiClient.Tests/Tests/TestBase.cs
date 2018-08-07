@@ -1,5 +1,6 @@
 using IdentityModel.Client;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -15,6 +16,8 @@ namespace myFastway.ApiClient.Tests
         protected readonly IConfigurationRoot config;
         protected readonly string authority, clientId, secret, scope;
         protected readonly string baseAddress, apiVersion;
+
+        HttpClient httpClient = new HttpClient();
 
         public TestBase()
         {
@@ -54,22 +57,17 @@ namespace myFastway.ApiClient.Tests
         /// <returns></returns>
         protected async Task<string> GetClientCredentialHttpClient() {
 
+            var content = new StringContent($"grant_type=client_credentials&client_id={clientId}&scope={scope}&client_secret={secret}");
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
 
-            using (var httpClient = new HttpClient()) {
+            var response = await httpClient.PostAsync($"{authority}/connect/token", content);
 
-                var content = new StringContent($"grant_type=client_credentials&client_id={clientId}&scope={scope}&client_secret={secret}");
-                content.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
-
-                var response = await httpClient.PostAsync($"{authority}/connect/token", content);
-
-                if (response.IsSuccessStatusCode) {
-                    var result = await response.Content.ReadAsStringAsync();
-                    return JObject.Parse(result)["access_token"].ToString();
-                }
-
-                return null;
-
+            if (response.IsSuccessStatusCode) {
+                var result = await response.Content.ReadAsStringAsync();
+                return JObject.Parse(result)["access_token"].ToString();
             }
+
+            return null;
         }
 
 
@@ -84,6 +82,20 @@ namespace myFastway.ApiClient.Tests
 
             return default(T);
         }
+
+        protected async Task<T> PostSingle<T>(string url, object payload, string apiVersion = "1.0") {
+
+            var content = new StringContent(JsonConvert.SerializeObject(payload));
+            var response = await CallApi(GetClientCredentialDiscovery, async (client) => await client.PostAsync($"api/{url}", content), apiVersion);
+
+            if (response.IsSuccessStatusCode) {
+                var jobj = JObject.Parse(await response.Content.ReadAsStringAsync());
+                return jobj["data"].ToObject<T>();
+            }
+
+            return default(T);
+        }
+
         protected async Task<IEnumerable<T>> GetCollection<T>(string url, string apiVersion = "1.0") {
 
             var response = await CallApi(GetClientCredentialDiscovery, async (client) => await client.GetAsync($"api/{url}"), apiVersion);
