@@ -1,4 +1,6 @@
 ﻿using myFastway.ApiClient.Tests.Models;
+using System.Net;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace myFastway.ApiClient.Tests.Tests
@@ -7,7 +9,7 @@ namespace myFastway.ApiClient.Tests.Tests
         public const string BASE_ROUTE = "addresses";
 
         [Fact]
-        public async void CanGetServicedBy() {
+        public async Task CanGetServicedBy() {
 
             var request = new ServicedByRequestModel {
                 FromRF = "SYD",
@@ -25,6 +27,22 @@ namespace myFastway.ApiClient.Tests.Tests
             Assert.Equal("SYD", servicedBy.Zone);
             Assert.Equal(string.Empty, servicedBy.SubDepot);
 
+        }
+
+        [Fact]
+        public async Task AddressValidation()
+        {
+            var address = new AddressModel
+            {
+                StreetAddress = "73 Katoomba Street",
+                Locality = "Katoomba",
+                StateOrProvince = "NSW",
+                PostalCode = "2780",
+                Country = "AU"
+            };
+
+            var response = await PostSingle($"{BASE_ROUTE}/validate", address);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         }
     }
 }

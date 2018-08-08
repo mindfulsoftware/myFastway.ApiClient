@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace myFastway.ApiClient.Tests.Models
+﻿namespace myFastway.ApiClient.Tests.Models
 {
     public class AddressModel
     {
@@ -15,7 +11,5 @@ namespace myFastway.ApiClient.Tests.Models
         public string Country { get; set; }
         public decimal Lat { get; set; }
         public decimal Lng { get; set; }
-        public byte[] Hash { get; set; }
-        public byte[] LatLngHash { get; set; }
     }
 }

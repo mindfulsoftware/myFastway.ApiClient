@@ -7,12 +7,15 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace myFastway.ApiClient.Tests
 {
     public abstract class TestBase
     {
+        const string JsonContentType = "application/json";
+
         protected readonly IConfigurationRoot config;
         protected readonly string authority, clientId, secret, scope;
         protected readonly string baseAddress, apiVersion;
@@ -83,11 +86,16 @@ namespace myFastway.ApiClient.Tests
             return default(T);
         }
 
+        protected async Task<HttpResponseMessage> PostSingle(string url, object payload, string apiVersion = "1.0")
+        {
+            var content = new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, JsonContentType);
+            var result = await CallApi(GetClientCredentialDiscovery, async (client) => await client.PostAsync($"api/{url}", content), apiVersion);
+            return result;
+        }
+
         protected async Task<T> PostSingle<T>(string url, object payload, string apiVersion = "1.0") {
 
-            var content = new StringContent(JsonConvert.SerializeObject(payload));
-            var response = await CallApi(GetClientCredentialDiscovery, async (client) => await client.PostAsync($"api/{url}", content), apiVersion);
-
+            var response = await PostSingle(url, payload, apiVersion);
             if (response.IsSuccessStatusCode) {
                 var jobj = JObject.Parse(await response.Content.ReadAsStringAsync());
                 return jobj["data"].ToObject<T>();
@@ -122,7 +130,7 @@ namespace myFastway.ApiClient.Tests
 
             using (var client = new HttpClient()) {
                 client.DefaultRequestHeaders.Accept.Clear();
-                var jsonHeader = new MediaTypeWithQualityHeaderValue("application/json");
+                var jsonHeader = new MediaTypeWithQualityHeaderValue(JsonContentType);
 
                 if (!string.IsNullOrEmpty(apiVersion))
                     jsonHeader.Parameters.Add(new NameValueHeaderValue("api-version", apiVersion));
