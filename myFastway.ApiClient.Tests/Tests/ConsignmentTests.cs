@@ -20,7 +20,7 @@ namespace myFastway.ApiClient.Tests.Tests
         public async Task Consign()
         {
             var consignment = GetConsignment();
-            var response = await PostSingle<ConsignmentResponse>($"{BASE_ROUTE}", consignment);
+            var response = await PostSingle<ConsignmentResponse>(BASE_ROUTE, consignment);
             Assert.True(response.ConsignmentId > 0);
         }
 

@@ -1,4 +1,5 @@
 ﻿using myFastway.ApiClient.Tests.Models;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace myFastway.ApiClient.Tests
@@ -9,7 +10,7 @@ namespace myFastway.ApiClient.Tests
 
 
         [Fact]
-        public async void CanGetContacts() {
+        public async Task CanGetContacts() {
 
             var addresses = await GetCollection<ContactModel>(BASE_ROUTE);
 
@@ -18,7 +19,7 @@ namespace myFastway.ApiClient.Tests
         }
 
         [Fact]
-        public async void CanGetContactById() {
+        public async Task CanGetContactById() {
 
             const string ID = "7";
 
@@ -27,5 +28,32 @@ namespace myFastway.ApiClient.Tests
             Assert.NotNull(address);
         }
 
+        [Fact]
+        public async Task CanPost()
+        {
+            var contact = GetContactModel();
+            var persistedContact = await PostSingle<ContactModel>(BASE_ROUTE, contact);
+            Assert.True(persistedContact.ContactId > 0);
+        }
+
+        private ContactModel GetContactModel()
+        {
+            var result = new ContactModel
+            {
+                ContactName = "Tony Receiver",
+                BusinessName = "Tony's Tools",
+                Email = "tony@tonystools.com.au",
+                PhoneNumber = "0400 123 456",
+                Address = new AddressModel
+                {
+                    StreetAddress = "73 Katoomba St",
+                    Locality = "Katoomba",
+                    PostalCode = "2780",
+                    StateOrProvince = "NSW",
+                    Country = "AU"
+                },
+            };
+            return result;
+        }
     }
 }
