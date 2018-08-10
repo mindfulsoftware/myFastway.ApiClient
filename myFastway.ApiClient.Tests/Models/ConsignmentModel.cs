@@ -20,9 +20,14 @@ namespace myFastway.ApiClient.Tests.Models
         public int? MyItemId { get; set; }
         public string MyItemCode { get; set; }
         public string SatchelSize { get; set; }
-        public decimal? WeightDead { get; set; }
-        public decimal? Length { get; set; }
-        public decimal? Width { get; set; }
-        public decimal? Height { get; set; }
+        public decimal WeightDead { get; set; }
+        public decimal Length { get; set; }
+        public decimal Width { get; set; }
+        public decimal Height { get; set; }
+    }
+
+    public class ConsignmentResponse
+    {
+        public int ConsignmentId { get; set; }
     }
 }

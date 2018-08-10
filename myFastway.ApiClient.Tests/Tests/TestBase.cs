@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -97,7 +98,9 @@ namespace myFastway.ApiClient.Tests
 
             var response = await PostSingle(url, payload, apiVersion);
             if (response.IsSuccessStatusCode) {
-                var jobj = JObject.Parse(await response.Content.ReadAsStringAsync());
+                var responseBody = await response.Content.ReadAsStringAsync();
+                Debug.WriteLine($"Response Body:\r\n{responseBody}");
+                var jobj = JObject.Parse(responseBody);
                 return jobj["data"].ToObject<T>();
             }
 

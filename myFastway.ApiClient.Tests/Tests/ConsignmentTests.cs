@@ -11,7 +11,22 @@ namespace myFastway.ApiClient.Tests.Tests
         [Fact]
         public async Task Quote()
         {
-            var consignment = new ConsignmentModel
+            var consignment = GetConsignment();
+            var quote = await PostSingle<QuoteModel>($"{BASE_ROUTE}/quote", consignment);
+            Assert.True(quote.Total > 0);
+        }
+
+        [Fact]
+        public async Task Consign()
+        {
+            var consignment = GetConsignment();
+            var response = await PostSingle<ConsignmentResponse>($"{BASE_ROUTE}", consignment);
+            Assert.True(response.ConsignmentId > 0);
+        }
+
+        private ConsignmentModel GetConsignment()
+        {
+            var result = new ConsignmentModel
             {
                 To = new ContactModel
                 {
@@ -49,10 +64,7 @@ namespace myFastway.ApiClient.Tests.Tests
                     }
                 }
             };
-
-            var quote = await PostSingle<QuoteModel>($"{BASE_ROUTE}/quote", consignment);
-
-            Assert.True(quote.Total > 0);
+            return result;
         }
     }
 }
