@@ -9,7 +9,7 @@ namespace myFastway.ApiClient.Tests.Tests
         const string BASE_ROUTE = "consignments";
 
         [Fact]
-        public async Task Quote()
+        public async Task CanQuote()
         {
             var consignment = GetConsignment();
             var quote = await PostSingle<QuoteModel>($"{BASE_ROUTE}/quote", consignment);
@@ -17,9 +17,21 @@ namespace myFastway.ApiClient.Tests.Tests
         }
 
         [Fact]
-        public async Task Consign()
+        public async Task CanConsign()
         {
             var consignment = GetConsignment();
+            var response = await PostSingle<ConsignmentResponse>(BASE_ROUTE, consignment);
+            Assert.True(response.ConsignmentId > 0);
+        }
+
+        [Fact]
+        public async Task CanConsignWithExistingContact()
+        {
+            var consignment = GetConsignment();
+            var persistedContact = await PostSingle<ContactModel>(ContactTests.BASE_ROUTE, consignment.To);
+            Assert.True(persistedContact.ContactId > 0);
+            consignment.To = null;
+            consignment.ToContactId = persistedContact.ContactId;
             var response = await PostSingle<ConsignmentResponse>(BASE_ROUTE, consignment);
             Assert.True(response.ConsignmentId > 0);
         }
