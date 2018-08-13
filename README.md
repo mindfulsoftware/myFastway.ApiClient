@@ -10,9 +10,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 This project is created using [ASP.NET Core 2.1](https://docs.microsoft.com/en-us/aspnet/core/?view=aspnetcore-2.1) Unit test project
 
-Once cloned, the appSettings.json document will have to be updated with your **client_id** and **secret** obtained from the website.  
-
-Finally the **base-address** of the api you're connecting to will have to be provided.  The current production api's are
+Once cloned, the appSettings.json document will have to be updated with your **client_id** and **secret** obtained from the website.  Finally the **base-address** of the api you're connecting to will have to be provided.  The current production api's are
 
 
 Country | base-address
