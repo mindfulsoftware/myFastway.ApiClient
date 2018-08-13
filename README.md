@@ -4,11 +4,37 @@ A client for the myFastway API, demonstrating the best practices for authenticat
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
 
 ### Prerequisites
 
 This project is created using [ASP.NET Core 2.1](https://docs.microsoft.com/en-us/aspnet/core/?view=aspnetcore-2.1) Unit test project
+
+Once cloned, the appSettings.json document will have to be updated with your **client_id** and **secret** obtained from the website.  
+
+Finally the **base-address** of the api you're connecting to will have to be provided.  The current production api's are
+
+
+Country | base-address
+:-------| :-------
+Australia | https://api.myfastway.com.au
+New Zealand | https://api.myfastway.co.nz
+
+
+```json
+{
+  "oauth": {
+    "authority": "https://identity.fastway.org/connect/token",
+    "client_id": "<YOUR CLIENT_ID>",
+    "secret": "<YOUR SECRET>",
+    "scope": ""
+  },
+  "api": {
+    "version": "1.0",
+    "base-address":  ""
+  }
+}
+```
 
 
 ## Built With
