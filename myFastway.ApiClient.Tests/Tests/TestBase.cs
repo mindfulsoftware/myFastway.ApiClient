@@ -21,7 +21,7 @@ namespace myFastway.ApiClient.Tests
         protected readonly string authority, clientId, secret, scope;
         protected readonly string baseAddress, apiVersion;
 
-        HttpClient httpClient = new HttpClient();
+        static readonly HttpClient httpClient = new HttpClient();
 
         public TestBase()
         {
@@ -78,13 +78,8 @@ namespace myFastway.ApiClient.Tests
         protected async Task<T> GetSingle<T>(string url, string apiVersion = "1.0") {
 
             var response = await CallApi(GetClientCredentialDiscovery, async (client) => await client.GetAsync($"api/{url}"), apiVersion);
-
-            if (response.IsSuccessStatusCode) {
-                var jobj = JObject.Parse(await response.Content.ReadAsStringAsync());
-                return jobj["data"].ToObject<T>();
-            }
-
-            return default(T);
+            var result = await ParseResponse<T>(response);
+            return result;
         }
 
         protected async Task<HttpResponseMessage> PostSingle(string url, object payload, string apiVersion = "1.0")
@@ -97,26 +92,27 @@ namespace myFastway.ApiClient.Tests
         protected async Task<T> PostSingle<T>(string url, object payload, string apiVersion = "1.0") {
 
             var response = await PostSingle(url, payload, apiVersion);
-            if (response.IsSuccessStatusCode) {
-                var responseBody = await response.Content.ReadAsStringAsync();
-                Debug.WriteLine($"Response Body:\r\n{responseBody}");
-                var jobj = JObject.Parse(responseBody);
-                return jobj["data"].ToObject<T>();
-            }
-
-            return default(T);
+            var result = await ParseResponse<T>(response);
+            return result;
         }
 
         protected async Task<IEnumerable<T>> GetCollection<T>(string url, string apiVersion = "1.0") {
 
             var response = await CallApi(GetClientCredentialDiscovery, async (client) => await client.GetAsync($"api/{url}"), apiVersion);
+            var result = await ParseResponse<IEnumerable<T>>(response);
+            return result;
+        }
 
-            if (response.IsSuccessStatusCode) {
-                var jobj = JObject.Parse(await response.Content.ReadAsStringAsync());
-                return jobj["data"].ToObject<IEnumerable<T>>();
+        async Task<T> ParseResponse<T>(HttpResponseMessage response)
+        {
+            if (response.IsSuccessStatusCode)
+            {
+                var responseBody = await response.Content.ReadAsStringAsync();
+                Debug.WriteLine($"Response Body:\r\n{responseBody}");
+                var jobj = JObject.Parse(responseBody);
+                return jobj["data"].ToObject<T>();
             }
-
-            return null;
+            return default(T);
         }
 
 

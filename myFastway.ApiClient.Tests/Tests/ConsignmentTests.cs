@@ -36,6 +36,16 @@ namespace myFastway.ApiClient.Tests.Tests
             Assert.True(response.ConsignmentId > 0);
         }
 
+        [Fact]
+        public async Task QuoteMatchesConsignment()
+        {
+            var consignment = GetConsignment();
+            var quote = await PostSingle<QuoteModel>($"{BASE_ROUTE}/quote", consignment);
+            var consignmentResponse = await PostSingle<ConsignmentResponse>(BASE_ROUTE, consignment);
+            var persistedConsignment = await GetSingle<ConsignmentModel>($"{BASE_ROUTE}/{consignmentResponse.ConsignmentId}");
+            Assert.Equal(quote.Total, persistedConsignment.Total);
+        }
+
         private ConsignmentModel GetConsignment()
         {
             var result = new ConsignmentModel

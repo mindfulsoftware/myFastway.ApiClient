@@ -10,6 +10,9 @@ namespace myFastway.ApiClient.Tests.Models
         public string InstructionsPrivate { get; set; }
         public string ExternalRef1 { get; set; }
         public string ExternalRef2 { get; set; }
+        public decimal Price { get; set; }
+        public decimal Tax { get; set; }
+        public decimal Total { get; set; }
         public IEnumerable<ConsignmentItemModel> Items { get; set; }
     }
 
