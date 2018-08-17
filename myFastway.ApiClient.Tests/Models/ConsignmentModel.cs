@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace myFastway.ApiClient.Tests.Models
 {
@@ -33,5 +34,25 @@ namespace myFastway.ApiClient.Tests.Models
     public class ConsignmentResponse
     {
         public int ConsignmentId { get; set; }
+    }
+
+    public class ConsignmentListItem
+    {
+        public int ConId { get; set; }
+        public string ToBusinessName { get; set; }
+        public string ToContactName { get; set; }
+        public string ToStreetAddress { get; set; }
+        public string ToAdditionalDetails { get; set; }
+        public string ToLocality { get; set; }
+        public string ToStateOrProvince { get; set; }
+        public string ToPostalCode { get; set; }
+        public decimal Total { get; set; }
+        public decimal TotalInvoiced { get; set; }
+        public DateTime CreatedOn { get; set; }
+        public byte ItemCount { get; set; }
+        public decimal Price { get; set; }
+        public decimal Tax { get; set; }
+        public string ExternalRef1 { get; set; }
+        public string ExternalRef2 { get; set; }
     }
 }

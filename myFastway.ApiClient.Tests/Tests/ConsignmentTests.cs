@@ -1,4 +1,6 @@
 ﻿using myFastway.ApiClient.Tests.Models;
+using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -44,6 +46,20 @@ namespace myFastway.ApiClient.Tests.Tests
             var consignmentResponse = await PostSingle<ConsignmentResponse>(BASE_ROUTE, consignment);
             var persistedConsignment = await GetSingle<ConsignmentModel>($"{BASE_ROUTE}/{consignmentResponse.ConsignmentId}");
             Assert.Equal(quote.Total, persistedConsignment.Total);
+        }
+
+        [Fact]
+        public async Task GetByDateRangeReturnsMultiple()
+        {
+            var consignment = GetConsignment();
+            for (var i = 0; i < 3; i++)
+            {
+                var consignmentResponse = await PostSingle<ConsignmentResponse>(BASE_ROUTE, consignment);
+                Assert.True(consignmentResponse.ConsignmentId > 0);
+            }
+            var dateFormat = DateTime.Now.ToString("yyyy-MM-dd");
+            var listItems = await GetCollection<ConsignmentListItem>($"{BASE_ROUTE}?fromDate={dateFormat}&toDate={dateFormat}&pageNumber=0&pageSize=10");
+            Assert.True(listItems.Count() >= 3);
         }
 
         private ConsignmentModel GetConsignment()
