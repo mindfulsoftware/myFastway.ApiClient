@@ -82,6 +82,13 @@ namespace myFastway.ApiClient.Tests
             return result;
         }
 
+        protected async Task<byte[]> GetBytes(string url, string apiVersion = "1.0")
+        {
+            var response = await CallApi(GetClientCredentialDiscovery, async (client) => await client.GetAsync($"api/{url}"), apiVersion);
+            var result = await response.Content.ReadAsByteArrayAsync();
+            return result;
+        }
+
         protected async Task<HttpResponseMessage> PostSingle(string url, object payload, string apiVersion = "1.0")
         {
             var content = new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, JsonContentType);

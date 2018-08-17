@@ -1,5 +1,7 @@
 ﻿using myFastway.ApiClient.Tests.Models;
 using System;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -61,6 +63,35 @@ namespace myFastway.ApiClient.Tests.Tests
             var listItems = await GetCollection<ConsignmentListItem>($"{BASE_ROUTE}?fromDate={dateFormat}&toDate={dateFormat}&pageNumber=0&pageSize=10");
             Assert.True(listItems.Count() >= 3);
         }
+
+        [Fact]
+        public async Task GetA4LabelsForConsignment()
+        {
+            var consignment = GetConsignment();
+            var consignmentResponse = await PostSingle<ConsignmentResponse>(BASE_ROUTE, consignment);
+            Assert.True(consignmentResponse.ConsignmentId > 0);
+            var labelsPdf = await GetBytes($"{BASE_ROUTE}/{consignmentResponse.ConsignmentId}/labels");
+            Assert.NotNull(labelsPdf);
+            Assert.NotEmpty(labelsPdf);
+            var path = $@"{Path.GetTempPath()}Labels_A4_{consignmentResponse.ConsignmentId}.pdf";
+            await File.WriteAllBytesAsync(path, labelsPdf);
+            Debug.WriteLine($"A4 Labels written to {path}");
+        }
+
+        [Fact]
+        public async Task Get4x6LabelsForConsignment()
+        {
+            var consignment = GetConsignment();
+            var consignmentResponse = await PostSingle<ConsignmentResponse>(BASE_ROUTE, consignment);
+            Assert.True(consignmentResponse.ConsignmentId > 0);
+            var labelsPdf = await GetBytes($"{BASE_ROUTE}/{consignmentResponse.ConsignmentId}/labels?pageSize=4x6");
+            Assert.NotNull(labelsPdf);
+            Assert.NotEmpty(labelsPdf);
+            var path = $@"{Path.GetTempPath()}Labels_4x6_{consignmentResponse.ConsignmentId}.pdf";
+            await File.WriteAllBytesAsync(path, labelsPdf);
+            Debug.WriteLine($"A Labels written to {path}");
+        }
+
 
         private ConsignmentModel GetConsignment()
         {
