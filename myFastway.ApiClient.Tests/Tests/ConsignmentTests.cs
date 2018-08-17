@@ -64,33 +64,24 @@ namespace myFastway.ApiClient.Tests.Tests
         }
 
         [Fact]
-        public async Task GetA4LabelsForConsignment()
+        public async Task GetLabelsForConsignment()
         {
             var consignment = GetConsignment();
             var persistedConsignment = await PostSingle<ConsignmentModel>(BASE_ROUTE, consignment);
             Assert.True(persistedConsignment.ConId > 0);
-            var labelsPdf = await GetBytes($"{BASE_ROUTE}/{persistedConsignment.ConId}/labels");
-            Assert.NotNull(labelsPdf);
-            Assert.NotEmpty(labelsPdf);
-            var path = $@"{Path.GetTempPath()}Labels_A4_{persistedConsignment.ConId}.pdf";
-            await File.WriteAllBytesAsync(path, labelsPdf);
-            Debug.WriteLine($"A4 Labels written to {path}");
+            await WriteLabelsPDF(persistedConsignment.ConId, "A4");
+            await WriteLabelsPDF(persistedConsignment.ConId, "4x6");
         }
 
-        [Fact]
-        public async Task Get4x6LabelsForConsignment()
+        private async Task WriteLabelsPDF(int conId, string pageSize)
         {
-            var consignment = GetConsignment();
-            var persistedConsignment = await PostSingle<ConsignmentModel>(BASE_ROUTE, consignment);
-            Assert.True(persistedConsignment.ConId > 0);
-            var labelsPdf = await GetBytes($"{BASE_ROUTE}/{persistedConsignment.ConId}/labels?pageSize=4x6");
+            var labelsPdf = await GetBytes($"{BASE_ROUTE}/{conId}/labels?pageSize={pageSize}");
             Assert.NotNull(labelsPdf);
             Assert.NotEmpty(labelsPdf);
-            var path = $@"{Path.GetTempPath()}Labels_4x6_{persistedConsignment.ConId}.pdf";
+            var path = $@"{Path.GetTempPath()}Labels_{pageSize}_{conId}.pdf";
             await File.WriteAllBytesAsync(path, labelsPdf);
-            Debug.WriteLine($"A Labels written to {path}");
+            Debug.WriteLine($"{pageSize} Labels written to {path}");
         }
-
 
         private ConsignmentModel GetConsignment()
         {
