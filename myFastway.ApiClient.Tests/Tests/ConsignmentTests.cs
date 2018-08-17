@@ -24,8 +24,8 @@ namespace myFastway.ApiClient.Tests.Tests
         public async Task CanConsign()
         {
             var consignment = GetConsignment();
-            var response = await PostSingle<ConsignmentResponse>(BASE_ROUTE, consignment);
-            Assert.True(response.ConsignmentId > 0);
+            var persistedConsignment = await PostSingle<ConsignmentModel>(BASE_ROUTE, consignment);
+            Assert.True(persistedConsignment.ConId > 0);
         }
 
         [Fact]
@@ -36,8 +36,8 @@ namespace myFastway.ApiClient.Tests.Tests
             Assert.True(persistedContact.ContactId > 0);
             consignment.To = null;
             consignment.ToContactId = persistedContact.ContactId;
-            var response = await PostSingle<ConsignmentResponse>(BASE_ROUTE, consignment);
-            Assert.True(response.ConsignmentId > 0);
+            var persistedConsignment = await PostSingle<ConsignmentModel>(BASE_ROUTE, consignment);
+            Assert.True(persistedConsignment.ConId > 0);
         }
 
         [Fact]
@@ -45,8 +45,7 @@ namespace myFastway.ApiClient.Tests.Tests
         {
             var consignment = GetConsignment();
             var quote = await PostSingle<QuoteModel>($"{BASE_ROUTE}/quote", consignment);
-            var consignmentResponse = await PostSingle<ConsignmentResponse>(BASE_ROUTE, consignment);
-            var persistedConsignment = await GetSingle<ConsignmentModel>($"{BASE_ROUTE}/{consignmentResponse.ConsignmentId}");
+            var persistedConsignment = await PostSingle<ConsignmentModel>(BASE_ROUTE, consignment);
             Assert.Equal(quote.Total, persistedConsignment.Total);
         }
 
@@ -56,8 +55,8 @@ namespace myFastway.ApiClient.Tests.Tests
             var consignment = GetConsignment();
             for (var i = 0; i < 3; i++)
             {
-                var consignmentResponse = await PostSingle<ConsignmentResponse>(BASE_ROUTE, consignment);
-                Assert.True(consignmentResponse.ConsignmentId > 0);
+                var persistedConsignment = await PostSingle<ConsignmentModel>(BASE_ROUTE, consignment);
+                Assert.True(persistedConsignment.ConId > 0);
             }
             var dateFormat = DateTime.Now.ToString("yyyy-MM-dd");
             var listItems = await GetCollection<ConsignmentListItem>($"{BASE_ROUTE}?fromDate={dateFormat}&toDate={dateFormat}&pageNumber=0&pageSize=10");
@@ -68,12 +67,12 @@ namespace myFastway.ApiClient.Tests.Tests
         public async Task GetA4LabelsForConsignment()
         {
             var consignment = GetConsignment();
-            var consignmentResponse = await PostSingle<ConsignmentResponse>(BASE_ROUTE, consignment);
-            Assert.True(consignmentResponse.ConsignmentId > 0);
-            var labelsPdf = await GetBytes($"{BASE_ROUTE}/{consignmentResponse.ConsignmentId}/labels");
+            var persistedConsignment = await PostSingle<ConsignmentModel>(BASE_ROUTE, consignment);
+            Assert.True(persistedConsignment.ConId > 0);
+            var labelsPdf = await GetBytes($"{BASE_ROUTE}/{persistedConsignment.ConId}/labels");
             Assert.NotNull(labelsPdf);
             Assert.NotEmpty(labelsPdf);
-            var path = $@"{Path.GetTempPath()}Labels_A4_{consignmentResponse.ConsignmentId}.pdf";
+            var path = $@"{Path.GetTempPath()}Labels_A4_{persistedConsignment.ConId}.pdf";
             await File.WriteAllBytesAsync(path, labelsPdf);
             Debug.WriteLine($"A4 Labels written to {path}");
         }
@@ -82,12 +81,12 @@ namespace myFastway.ApiClient.Tests.Tests
         public async Task Get4x6LabelsForConsignment()
         {
             var consignment = GetConsignment();
-            var consignmentResponse = await PostSingle<ConsignmentResponse>(BASE_ROUTE, consignment);
-            Assert.True(consignmentResponse.ConsignmentId > 0);
-            var labelsPdf = await GetBytes($"{BASE_ROUTE}/{consignmentResponse.ConsignmentId}/labels?pageSize=4x6");
+            var persistedConsignment = await PostSingle<ConsignmentModel>(BASE_ROUTE, consignment);
+            Assert.True(persistedConsignment.ConId > 0);
+            var labelsPdf = await GetBytes($"{BASE_ROUTE}/{persistedConsignment.ConId}/labels?pageSize=4x6");
             Assert.NotNull(labelsPdf);
             Assert.NotEmpty(labelsPdf);
-            var path = $@"{Path.GetTempPath()}Labels_4x6_{consignmentResponse.ConsignmentId}.pdf";
+            var path = $@"{Path.GetTempPath()}Labels_4x6_{persistedConsignment.ConId}.pdf";
             await File.WriteAllBytesAsync(path, labelsPdf);
             Debug.WriteLine($"A Labels written to {path}");
         }

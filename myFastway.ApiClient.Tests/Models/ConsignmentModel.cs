@@ -5,6 +5,7 @@ namespace myFastway.ApiClient.Tests.Models
 {
     public class ConsignmentModel
     {
+        public int ConId { get; set; }
         public int ToContactId { get; set; }
         public ContactModel To { get; set; }
         public string InstructionsPublic { get; set; }
@@ -29,11 +30,6 @@ namespace myFastway.ApiClient.Tests.Models
         public decimal Length { get; set; }
         public decimal Width { get; set; }
         public decimal Height { get; set; }
-    }
-
-    public class ConsignmentResponse
-    {
-        public int ConsignmentId { get; set; }
     }
 
     public class ConsignmentListItem
