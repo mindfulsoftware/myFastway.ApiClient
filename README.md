@@ -4,7 +4,7 @@ A client for the myFastway API, demonstrating the best practices for authenticat
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.  For endpoint detail, including request and response objects, please consult the [wiki](https://github.com/mindfulsoftware/myFastway.ApiClient/wiki)
 
 ### Prerequisites
 
