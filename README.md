@@ -13,11 +13,11 @@ This project is created using [ASP.NET Core 2.1](https://docs.microsoft.com/en-u
 Once cloned, the appSettings.json document will have to be updated with your **client_id** and **secret** obtained from the website.  Finally the **base-address** of the api you're connecting to will have to be provided.  The current production api's are
 
 
-Resource | Country | base-address
-:-------|:-------| :-------
-Token Server | [All countries] | https://identity.fastway.org/connect/token
-myFastway API |Australia | https://api.myfastway.com.au
-myFastway API |New Zealand | https://api.myfastway.co.nz
+Resource | Country |Description| base-address
+:-------|:-------| :-------| :-------
+Token Server | [All countries] | oauth authority | https://identity.fastway.org/connect/token
+myFastway API |Australia | api base address | https://api.myfastway.com.au
+myFastway API |New Zealand | api base address | https://api.myfastway.co.nz
 
 
 ```json
