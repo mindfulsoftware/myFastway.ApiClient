@@ -163,7 +163,8 @@ namespace myFastway.ApiClient.Tests
 
                 client.DefaultRequestHeaders.Accept.Add(jsonHeader);
                 client.BaseAddress = new Uri(baseAddress);
-                client.SetBearerToken(await getAccessToken());
+                var accessToken = await getAccessToken();
+                client.SetBearerToken(accessToken);
 
                 retVal = await callApi(client);
 

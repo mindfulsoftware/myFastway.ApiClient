@@ -35,7 +35,7 @@ namespace myFastway.ApiClient.Tests.Tests
             Assert.True(persistedContact.ContactId > 0);
             consignment.To = null;
             consignment.ToContactId = persistedContact.ContactId;
-            var persistedConsignment = await PostSingle<ConsignmentModel>(BASE_ROUTE, consignment);
+            var persistedConsignment = await PostSingle<PersistedConsignmentModel>(BASE_ROUTE, consignment);
             Assert.True(persistedConsignment.ConId > 0);
         }
 
@@ -44,7 +44,7 @@ namespace myFastway.ApiClient.Tests.Tests
         {
             var consignment = GetConsignment();
             var quote = await PostSingle<QuoteModel>($"{BASE_ROUTE}/quote", consignment);
-            var persistedConsignment = await PostSingle<ConsignmentModel>(BASE_ROUTE, consignment);
+            var persistedConsignment = await PostSingle<PersistedConsignmentModel>(BASE_ROUTE, consignment);
             Assert.Equal(quote.Total, persistedConsignment.Total);
         }
 
@@ -71,6 +71,16 @@ namespace myFastway.ApiClient.Tests.Tests
         }
 
         [Fact]
+        public async Task GetLabelsForConsignmentLabels()
+        {
+            var persistedConsignment = await Consign();
+            Assert.True(persistedConsignment.ConId > 0);
+            var label = persistedConsignment.Items.First().Label;
+            await WriteLabelsPDF(persistedConsignment.ConId, "A4", label);
+            await WriteLabelsPDF(persistedConsignment.ConId, "4x6", label);
+        }
+
+        [Fact]
         public async Task DeleteAndUndeleteCycle()
         {
             var persistedConsignment = await Consign();
@@ -82,37 +92,39 @@ namespace myFastway.ApiClient.Tests.Tests
             var deleteResponse = await Delete($"{BASE_ROUTE}/{persistedConsignment.ConId}/reason/{deletedReasons.First().Id}");
             Assert.True(deleteResponse.IsSuccessStatusCode);
 
-            var shouldBeNull = await GetSingle<ConsignmentModel>($"{BASE_ROUTE}/{persistedConsignment.ConId}");
+            var shouldBeNull = await GetSingle<PersistedConsignmentModel>($"{BASE_ROUTE}/{persistedConsignment.ConId}");
             Assert.Null(shouldBeNull);
 
             var undeleteResponse = await PutSingle($"{BASE_ROUTE}/{persistedConsignment.ConId}/undelete", null);
             Assert.True(undeleteResponse.IsSuccessStatusCode);
 
-            var undeletedConsignment = await GetSingle<ConsignmentModel>($"{BASE_ROUTE}/{persistedConsignment.ConId}");
+            var undeletedConsignment = await GetSingle<PersistedConsignmentModel>($"{BASE_ROUTE}/{persistedConsignment.ConId}");
             Assert.NotNull(undeletedConsignment);
             Assert.Equal(persistedConsignment.ConId, undeletedConsignment.ConId);
         }
 
-        private async Task WriteLabelsPDF(int conId, string pageSize)
+        private async Task WriteLabelsPDF(int conId, string pageSize, string label = null)
         {
-            var labelsPdf = await GetBytes($"{BASE_ROUTE}/{conId}/labels?pageSize={pageSize}");
+            var labelPart = string.IsNullOrWhiteSpace(label) ? string.Empty : $"/{label}";
+            var labelsPdf = await GetBytes($"{BASE_ROUTE}/{conId}/labels{labelPart}?pageSize={pageSize}");
             Assert.NotNull(labelsPdf);
             Assert.NotEmpty(labelsPdf);
-            var path = $@"{Path.GetTempPath()}Labels_{pageSize}_{conId}.pdf";
+            var suffix = string.IsNullOrWhiteSpace(label) ? conId.ToString() : label;
+            var path = $@"{Path.GetTempPath()}Labels_{pageSize}_{suffix}.pdf";
             await File.WriteAllBytesAsync(path, labelsPdf);
             Debug.WriteLine($"{pageSize} Labels written to {path}");
         }
 
-        private async Task<ConsignmentModel> Consign()
+        private async Task<PersistedConsignmentModel> Consign()
         {
             var consignment = GetConsignment();
-            var result = await PostSingle<ConsignmentModel>(BASE_ROUTE, consignment);
+            var result = await PostSingle<PersistedConsignmentModel>(BASE_ROUTE, consignment);
             return result;
         }
 
-        private ConsignmentModel GetConsignment()
+        private CreateConsignmentModel GetConsignment()
         {
-            var result = new ConsignmentModel
+            var result = new CreateConsignmentModel
             {
                 To = new ContactModel
                 {
@@ -131,7 +143,7 @@ namespace myFastway.ApiClient.Tests.Tests
                 },
                 Items = new[]
                 {
-                    new ConsignmentItemModel
+                    new CreateConsignmentItemModel
                     {
                         Quantity = 1,
                         PackageType = "P",
@@ -141,7 +153,7 @@ namespace myFastway.ApiClient.Tests.Tests
                         Width = 10,
                         Height = 10
                     },
-                    new ConsignmentItemModel
+                    new CreateConsignmentItemModel
                     {
                         Quantity = 1,
                         PackageType = "S",
