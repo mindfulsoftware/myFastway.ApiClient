@@ -11,5 +11,6 @@
         public decimal Width { get; set; }
         public decimal Height { get; set; }
         public decimal WeightCubic { get; set; }
+        public byte[] Version { get; set; }
     }
 }
