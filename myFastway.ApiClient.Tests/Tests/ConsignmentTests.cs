@@ -106,6 +106,15 @@ namespace myFastway.ApiClient.Tests.Tests
             Assert.Equal(persistedConsignment.ConId, undeletedConsignment.ConId);
         }
 
+        [Fact]
+        public async Task GetPending()
+        {
+            var persistedConsignment = await Consign();
+
+            var pending = await GetCollection<ConsignmentSearchItem>($"{BASE_ROUTE}/pending?pageNumber=0&pageSize=10");
+            Assert.NotEmpty(pending);
+        }
+
         private async Task WriteLabelsPDF(int conId, string pageSize, string label = null)
         {
             var labelPart = string.IsNullOrWhiteSpace(label) ? string.Empty : $"/{label}";

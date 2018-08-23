@@ -78,4 +78,16 @@ namespace myFastway.ApiClient.Tests.Models
         public string ExternalRef1 { get; set; }
         public string ExternalRef2 { get; set; }
     }
+
+    public class ConsignmentSearchItem
+    {
+        public int ConId { get; set; }
+        public string ToBusinessName { get; set; }
+        public string ToContactName { get; set; }
+        public decimal ConTotal { get; set; }
+        public decimal ConTotalInvoiced { get; set; }
+        public decimal ConTotalPending { get; set; }
+        public string ToAddress { get; set; }
+        public DateTime CreatedOn { get; set; }
+    }
 }
