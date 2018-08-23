@@ -23,8 +23,7 @@ namespace myFastway.ApiClient.Tests.Tests
         [Fact]
         public async Task CanConsign()
         {
-            var consignment = GetConsignment();
-            var persistedConsignment = await PostSingle<ConsignmentModel>(BASE_ROUTE, consignment);
+            var persistedConsignment = await Consign();
             Assert.True(persistedConsignment.ConId > 0);
         }
 
@@ -52,10 +51,9 @@ namespace myFastway.ApiClient.Tests.Tests
         [Fact]
         public async Task GetByDateRangeReturnsMultiple()
         {
-            var consignment = GetConsignment();
             for (var i = 0; i < 3; i++)
             {
-                var persistedConsignment = await PostSingle<ConsignmentModel>(BASE_ROUTE, consignment);
+                var persistedConsignment = await Consign();
                 Assert.True(persistedConsignment.ConId > 0);
             }
             var dateFormat = DateTime.Now.ToString("yyyy-MM-dd");
@@ -66,11 +64,33 @@ namespace myFastway.ApiClient.Tests.Tests
         [Fact]
         public async Task GetLabelsForConsignment()
         {
-            var consignment = GetConsignment();
-            var persistedConsignment = await PostSingle<ConsignmentModel>(BASE_ROUTE, consignment);
+            var persistedConsignment = await Consign();
             Assert.True(persistedConsignment.ConId > 0);
             await WriteLabelsPDF(persistedConsignment.ConId, "A4");
             await WriteLabelsPDF(persistedConsignment.ConId, "4x6");
+        }
+
+        [Fact]
+        public async Task DeleteAndUndeleteCycle()
+        {
+            var persistedConsignment = await Consign();
+            Assert.True(persistedConsignment.ConId > 0);
+
+            var deletedReasons = await GetCollection<DeletedReasonModel>($"{BASE_ROUTE}/deleted-reasons");
+            Assert.NotEmpty(deletedReasons);
+
+            var deleteResponse = await Delete($"{BASE_ROUTE}/{persistedConsignment.ConId}/reason/{deletedReasons.First().Id}");
+            Assert.True(deleteResponse.IsSuccessStatusCode);
+
+            var shouldBeNull = await GetSingle<ConsignmentModel>($"{BASE_ROUTE}/{persistedConsignment.ConId}");
+            Assert.Null(shouldBeNull);
+
+            var undeleteResponse = await PutSingle($"{BASE_ROUTE}/{persistedConsignment.ConId}/undelete", null);
+            Assert.True(undeleteResponse.IsSuccessStatusCode);
+
+            var undeletedConsignment = await GetSingle<ConsignmentModel>($"{BASE_ROUTE}/{persistedConsignment.ConId}");
+            Assert.NotNull(undeletedConsignment);
+            Assert.Equal(persistedConsignment.ConId, undeletedConsignment.ConId);
         }
 
         private async Task WriteLabelsPDF(int conId, string pageSize)
@@ -81,6 +101,13 @@ namespace myFastway.ApiClient.Tests.Tests
             var path = $@"{Path.GetTempPath()}Labels_{pageSize}_{conId}.pdf";
             await File.WriteAllBytesAsync(path, labelsPdf);
             Debug.WriteLine($"{pageSize} Labels written to {path}");
+        }
+
+        private async Task<ConsignmentModel> Consign()
+        {
+            var consignment = GetConsignment();
+            var result = await PostSingle<ConsignmentModel>(BASE_ROUTE, consignment);
+            return result;
         }
 
         private ConsignmentModel GetConsignment()

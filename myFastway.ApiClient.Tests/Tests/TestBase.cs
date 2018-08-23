@@ -91,8 +91,15 @@ namespace myFastway.ApiClient.Tests
 
         protected async Task<HttpResponseMessage> PostSingle(string url, object payload, string apiVersion = "1.0")
         {
-            var content = new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, JsonContentType);
+            var content = GetPayloadContent(payload);
             var result = await CallApi(GetClientCredentialDiscovery, async (client) => await client.PostAsync($"api/{url}", content), apiVersion);
+            return result;
+        }
+
+        protected async Task<HttpResponseMessage> PutSingle(string url, object payload, string apiVersion = "1.0")
+        {
+            var content = GetPayloadContent(payload);
+            var result = await CallApi(GetClientCredentialDiscovery, async (client) => await client.PutAsync($"api/{url}", content), apiVersion);
             return result;
         }
 
@@ -107,6 +114,19 @@ namespace myFastway.ApiClient.Tests
 
             var response = await CallApi(GetClientCredentialDiscovery, async (client) => await client.GetAsync($"api/{url}"), apiVersion);
             var result = await ParseResponse<IEnumerable<T>>(response);
+            return result;
+        }
+
+        protected async Task<HttpResponseMessage> Delete(string url, string apiVersion = "1.0")
+        {
+            var result = await CallApi(GetClientCredentialDiscovery, async client => await client.DeleteAsync($"api/{url}"), apiVersion);
+            return result;
+        }
+
+        StringContent GetPayloadContent(object payload)
+        {
+            var serialised = payload == null ? string.Empty : JsonConvert.SerializeObject(payload);
+            var result = new StringContent(serialised, Encoding.UTF8, JsonContentType);
             return result;
         }
 
