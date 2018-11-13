@@ -40,8 +40,7 @@ namespace myFastway.ApiClient.Tests.Tests
         {
             var consignment = GetConsignment();
             var persistedContact = await PostSingle<ContactModel>(ContactTests.BASE_ROUTE, consignment.To);
-            consignment.To = null;
-            consignment.ToContactId = persistedContact.ContactId;
+            consignment.To = new ContactModel { ContactId = persistedContact.ContactId };
             var persistedConsignment = await PostSingle<PersistedConsignmentModel>(BASE_ROUTE, consignment);
             Assert.True(persistedConsignment.ConId > 0);
         }

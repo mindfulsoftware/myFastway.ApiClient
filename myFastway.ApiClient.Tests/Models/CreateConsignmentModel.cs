@@ -5,7 +5,6 @@ namespace myFastway.ApiClient.Tests.Models
     public class CreateConsignmentModel
     {
         public int ConId { get; set; }
-        public int ToContactId { get; set; }
         public ContactModel To { get; set; }
         public string InstructionsPublic { get; set; }
         public string InstructionsPrivate { get; set; }
