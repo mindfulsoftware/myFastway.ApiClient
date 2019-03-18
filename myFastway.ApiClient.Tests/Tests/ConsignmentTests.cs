@@ -1,5 +1,6 @@
 ﻿using myFastway.ApiClient.Tests.Models;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -24,6 +25,28 @@ namespace myFastway.ApiClient.Tests.Tests
         public async Task CanConsign()
         {
             var persistedConsignment = await Consign();
+        }
+
+        [Fact]
+        public async Task CanConsignWithServices()
+        {
+            var consignment = GetConsignment();
+            var services = await GetCollection<ServiceModel>("consignment-services");
+            var hasAvailableServices = services.Any();
+            if (hasAvailableServices)
+            {
+                var firstService = services.First();
+                var firstItem = firstService.Items.First();
+                consignment.Services = new List<CreateConsignmentServiceModel>
+                {
+                    new CreateConsignmentServiceModel
+                    {
+                        ServiceCode = firstService.Code,
+                        ServiceItemCode = firstItem.Code
+                    }
+                };
+            }
+            await Consign(consignment);
         }
 
         [Fact]
@@ -126,9 +149,9 @@ namespace myFastway.ApiClient.Tests.Tests
             Debug.WriteLine($"{pageSize} Labels written to {path}");
         }
 
-        private async Task<PersistedConsignmentModel> Consign()
+        private async Task<PersistedConsignmentModel> Consign(CreateConsignmentModel consignment = null)
         {
-            var consignment = GetConsignment();
+            consignment = consignment ?? GetConsignment();
             var result = await PostSingle<PersistedConsignmentModel>(BASE_ROUTE, consignment);
             Assert.True(result.ConId > 0);
             return result;

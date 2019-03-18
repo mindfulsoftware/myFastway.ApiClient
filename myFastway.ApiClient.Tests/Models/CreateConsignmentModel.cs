@@ -14,6 +14,7 @@ namespace myFastway.ApiClient.Tests.Models
         public decimal Tax { get; set; }
         public decimal Total { get; set; }
         public IEnumerable<CreateConsignmentItemModel> Items { get; set; }
+        public IEnumerable<CreateConsignmentServiceModel> Services { get; set; }
     }
 
     public class CreateConsignmentItemModel
@@ -28,5 +29,11 @@ namespace myFastway.ApiClient.Tests.Models
         public decimal Length { get; set; }
         public decimal Width { get; set; }
         public decimal Height { get; set; }
+    }
+
+    public class CreateConsignmentServiceModel
+    {
+        public string ServiceCode { get; set; }
+        public string ServiceItemCode { get; set; }
     }
 }
