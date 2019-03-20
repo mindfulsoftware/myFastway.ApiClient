@@ -137,6 +137,35 @@ namespace myFastway.ApiClient.Tests.Tests
             Assert.NotEmpty(pending);
         }
 
+        [Fact]
+        public async Task CanConsignUsingMyItemId()
+        {
+            // save my item
+            var newMyItem = new MyItemsModel
+            {
+                Code = "BB",
+                Height = 10,
+                Length = 20,
+                Name = "Big Box",
+                WeightDead = 5,
+                Width = 30
+            };
+            var persistedMyItem = await PostSingle<MyItemsModel>("my-items", newMyItem);
+            Assert.True(persistedMyItem.MyItemId > 0);
+
+            // consign with my item
+            var consignment = GetConsignment();
+            consignment.Items = new[]
+            {
+                new CreateConsignmentItemModel
+                {
+                    Quantity = 1,
+                    MyItemId = persistedMyItem.MyItemId
+                },
+            };
+            await Consign(consignment);
+        }
+
         private async Task WriteLabelsPDF(int conId, string pageSize, string label = null)
         {
             var labelPart = string.IsNullOrWhiteSpace(label) ? string.Empty : $"/{label}";
