@@ -5,6 +5,7 @@ namespace myFastway.ApiClient.Tests.Models
     public class CreateConsignmentModel
     {
         public int ConId { get; set; }
+        public ContactModel From { get; set; }
         public ContactModel To { get; set; }
         public string InstructionsPublic { get; set; }
         public string InstructionsPrivate { get; set; }
@@ -15,6 +16,7 @@ namespace myFastway.ApiClient.Tests.Models
         public decimal Total { get; set; }
         public IEnumerable<CreateConsignmentItemModel> Items { get; set; }
         public IEnumerable<CreateConsignmentServiceModel> Services { get; set; }
+        public ConType ConType { get; set; }
     }
 
     public class CreateConsignmentItemModel
@@ -35,5 +37,14 @@ namespace myFastway.ApiClient.Tests.Models
     {
         public string ServiceCode { get; set; }
         public string ServiceItemCode { get; set; }
+    }
+
+    public enum ConType : byte
+    {
+        Standard = 1,
+        ReceiverPays = 2,
+        ThirdParty = 3,
+        Returns = 4,
+        Reseller = 5
     }
 }

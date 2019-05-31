@@ -16,7 +16,23 @@ namespace myFastway.ApiClient.Tests.Tests
         [Fact]
         public async Task CanQuote()
         {
-            var consignment = GetConsignment();
+            var consignment = GetStandardConsignment();
+            var quote = await PostSingle<QuoteModel>($"{BASE_ROUTE}/quote", consignment);
+            Assert.True(quote.Total > 0);
+        }
+
+        [Fact]
+        public async Task CanQuoteReseller()
+        {
+            var consignment = GetResellerConsignment();
+            var quote = await PostSingle<QuoteModel>($"{BASE_ROUTE}/quote", consignment);
+            Assert.True(quote?.Total > 0);
+        }
+
+        [Fact]
+        public async Task CanQuoteReceiverPays()
+        {
+            var consignment = GetReceiverPaysConsignment();
             var quote = await PostSingle<QuoteModel>($"{BASE_ROUTE}/quote", consignment);
             Assert.True(quote.Total > 0);
         }
@@ -28,9 +44,25 @@ namespace myFastway.ApiClient.Tests.Tests
         }
 
         [Fact]
+        public async Task CanConsignReseller()
+        {
+            var consignment = GetResellerConsignment();
+            var result = await PostSingle<PersistedConsignmentModel>(BASE_ROUTE, consignment);
+            Assert.True(result?.ConId > 0);
+        }
+
+        [Fact]
+        public async Task CanConsignReceiverPays()
+        {
+            var consignment = GetReceiverPaysConsignment();
+            var result = await PostSingle<PersistedConsignmentModel>(BASE_ROUTE, consignment);
+            Assert.True(result?.ConId > 0);
+        }
+
+        [Fact]
         public async Task CanConsignWithServices()
         {
-            var consignment = GetConsignment();
+            var consignment = GetStandardConsignment();
             var services = await GetCollection<ServiceModel>("consignment-services");
             var hasAvailableServices = services.Any();
             if (hasAvailableServices)
@@ -61,7 +93,7 @@ namespace myFastway.ApiClient.Tests.Tests
         [Fact]
         public async Task CanConsignWithExistingContact()
         {
-            var consignment = GetConsignment();
+            var consignment = GetStandardConsignment();
             var persistedContact = await PostSingle<ContactModel>(ContactTests.BASE_ROUTE, consignment.To);
             consignment.To = new ContactModel { ContactId = persistedContact.ContactId };
             var persistedConsignment = await PostSingle<PersistedConsignmentModel>(BASE_ROUTE, consignment);
@@ -71,7 +103,7 @@ namespace myFastway.ApiClient.Tests.Tests
         [Fact]
         public async Task QuoteMatchesConsignment()
         {
-            var consignment = GetConsignment();
+            var consignment = GetStandardConsignment();
             var quote = await PostSingle<QuoteModel>($"{BASE_ROUTE}/quote", consignment);
             var persistedConsignment = await PostSingle<PersistedConsignmentModel>(BASE_ROUTE, consignment);
             Assert.Equal(quote.Total, persistedConsignment.Total);
@@ -154,7 +186,7 @@ namespace myFastway.ApiClient.Tests.Tests
             Assert.True(persistedMyItem.MyItemId > 0);
 
             // consign with my item
-            var consignment = GetConsignment();
+            var consignment = GetStandardConsignment();
             consignment.Items = new[]
             {
                 new CreateConsignmentItemModel
@@ -180,16 +212,47 @@ namespace myFastway.ApiClient.Tests.Tests
 
         private async Task<PersistedConsignmentModel> Consign(CreateConsignmentModel consignment = null)
         {
-            consignment = consignment ?? GetConsignment();
+            consignment = consignment ?? GetStandardConsignment();
             var result = await PostSingle<PersistedConsignmentModel>(BASE_ROUTE, consignment);
             Assert.True(result.ConId > 0);
             return result;
         }
 
-        private CreateConsignmentModel GetConsignment()
+        private CreateConsignmentModel GetReceiverPaysConsignment()
+        {
+            var result = GetResellerConsignment();
+            result.ConType = ConType.ReceiverPays;
+            result.To = null;
+            return result;
+        }
+
+        private CreateConsignmentModel GetResellerConsignment()
+        {
+            var result = GetStandardConsignment();
+            result.ConType = ConType.Reseller;
+            result.From = new ContactModel
+            {
+                ContactName = "Sarah Sender",
+                BusinessName = "Sarahs' Stuff",
+                Email = "sarah@sarahs-stuff.com.au",
+                PhoneNumber = "0400 000 111",
+                Address = new AddressModel
+                {
+                    StreetAddress = "333 Collins St",
+                    Locality = "Melbourne",
+                    PostalCode = "3000",
+                    StateOrProvince = "VIC",
+                    Country = "AU"
+                },
+            };
+            return result;
+        }
+
+        private CreateConsignmentModel GetStandardConsignment()
         {
             var result = new CreateConsignmentModel
             {
+                ConType = ConType.Standard,
                 To = new ContactModel
                 {
                     ContactName = "Tony Receiver",
