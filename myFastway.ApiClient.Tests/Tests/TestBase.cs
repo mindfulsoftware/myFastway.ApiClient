@@ -132,10 +132,10 @@ namespace myFastway.ApiClient.Tests
 
         async Task<T> ParseResponse<T>(HttpResponseMessage response)
         {
+            var responseBody = await response.Content.ReadAsStringAsync();
+            Debug.WriteLine($"Response Body:\r\n{responseBody}");
             if (response.IsSuccessStatusCode)
             {
-                var responseBody = await response.Content.ReadAsStringAsync();
-                Debug.WriteLine($"Response Body:\r\n{responseBody}");
                 var jobj = JObject.Parse(responseBody);
                 return jobj["data"].ToObject<T>();
             }
