@@ -11,5 +11,9 @@
         public string Country { get; set; }
         public decimal Lat { get; set; }
         public decimal Lng { get; set; }
+        public bool UserCreated { get; set; }
+        public string Hash { get; set; }
+        public string PlaceId { get; set; }
+
     }
 }

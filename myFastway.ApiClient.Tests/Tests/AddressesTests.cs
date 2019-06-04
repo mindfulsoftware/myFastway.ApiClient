@@ -19,21 +19,21 @@ namespace myFastway.ApiClient.Tests.Tests
                 Lng = 151.2098659m
             };
 
-            var servicedBy = await PostSingle<ServicedByResponseModel>($"{BASE_ROUTE}/serviced-by", request);
+            var expected = await LoadModelFromFile<ServicedByResponseModel>("servicedByResponse");
+            var actual = await PostSingle<ServicedByResponseModel>($"{BASE_ROUTE}/serviced-by", request);
 
-            Assert.NotNull(servicedBy);
-            Assert.Equal("SYD", servicedBy.RF);
-            Assert.Equal("201", servicedBy.CF);
-            Assert.Equal("SYD", servicedBy.Zone);
-            Assert.Equal(string.Empty, servicedBy.SubDepot);
+            Assert.NotNull(actual);
+            Assert.Equal(expected.RF, actual.RF);
+            Assert.Equal(expected.CF, actual.CF);
+            Assert.Equal(expected.Zone, actual.Zone);
+            Assert.Equal(expected.SubDepot, actual.SubDepot);
 
         }
 
         [Fact]
         public async Task AddressValidation()
         {
-            var address = new AddressModel
-            {
+            var address = new AddressModel {
                 StreetAddress = "73 Katoomba Street",
                 Locality = "Katoomba",
                 StateOrProvince = "NSW",
