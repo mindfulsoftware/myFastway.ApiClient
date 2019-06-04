@@ -10,9 +10,9 @@ namespace myFastway.ApiClient.Tests.Tests {
         [Fact]
         public async Task CanGetAvailableBalance() {
 
-            var accounts = await GetSingle<AccountBalanceAvailableModel>($"{BASE_ROUTE}/available/balance");
+            var balance = await GetSingle<AccountBalanceAvailableModel>($"{BASE_ROUTE}/available/balance");
 
-            Assert.NotNull(accounts);
+            Assert.NotNull(balance);
         }
 
         [Fact]
@@ -27,11 +27,10 @@ namespace myFastway.ApiClient.Tests.Tests {
         [Fact]
         public async Task CanGetPendingBalance() {
 
-            var accounts = await GetSingle<AccountBalancePendingModel>($"{BASE_ROUTE}/pending/balance");
+            var balance = await GetSingle<AccountBalancePendingModel>($"{BASE_ROUTE}/pending/balance");
 
-            Assert.NotNull(accounts);
+            Assert.NotNull(balance);
         }
-
 
         [Fact]
         public async Task CanGetPendingTransactions() {

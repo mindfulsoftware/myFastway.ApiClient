@@ -1,10 +1,12 @@
 using IdentityModel.Client;
 using Microsoft.Extensions.Configuration;
+using myFastway.ApiClient.Tests.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -17,26 +19,20 @@ namespace myFastway.ApiClient.Tests
     {
         const string JsonContentType = "application/json";
 
-        protected readonly IConfigurationRoot config;
-        protected readonly string authority, clientId, secret, scope;
-        protected readonly string baseAddress, apiVersion;
+        protected readonly IConfigurationRoot configurationRoot;
+        protected readonly ConfigModel config;
 
         static readonly HttpClient httpClient = new HttpClient();
 
         public TestBase()
         {
-            config = new ConfigurationBuilder()
+            configurationRoot = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json")
-                .AddJsonFile("appsettings-local.json")
+                .AddJsonFile("appsettings.local.json")
                 .Build();
 
-            authority = config["oauth:authority"];
-            clientId = config["oauth:client_id"];
-            secret = config["oauth:secret"];
-            scope = config["oauth:scope"];
+            config = new ConfigModel(configurationRoot);
 
-            baseAddress = config["api:base-address"];
-            apiVersion = config["api:version"];
         }
 
         /// <summary>
@@ -45,14 +41,14 @@ namespace myFastway.ApiClient.Tests
         /// <returns></returns>
         protected async Task<string> GetClientCredentialDiscovery() {
 
-            var discoveryClient = new DiscoveryClient(authority) {
+            var discoveryClient = new DiscoveryClient(config.OAuth.Authority) {
                 Policy = new DiscoveryPolicy { RequireHttps = true }
             };
 
             var disco = await discoveryClient.GetAsync();
 
-            var tokenClient = new TokenClient(disco.TokenEndpoint, clientId, secret);
-            return (await tokenClient.RequestClientCredentialsAsync(scope)).AccessToken;
+            var tokenClient = new TokenClient(disco.TokenEndpoint, config.OAuth.ClientId, config.OAuth.Secret);
+            return (await tokenClient.RequestClientCredentialsAsync(config.OAuth.Scope)).AccessToken;
         }
 
         /// <summary>
@@ -61,10 +57,10 @@ namespace myFastway.ApiClient.Tests
         /// <returns></returns>
         protected async Task<string> GetClientCredentialHttpClient() {
 
-            var content = new StringContent($"grant_type=client_credentials&client_id={clientId}&scope={scope}&client_secret={secret}");
+            var content = new StringContent($"grant_type=client_credentials&client_id={config.OAuth.ClientId}&scope={config.OAuth.Scope}&client_secret={config.OAuth.Secret}");
             content.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
 
-            var response = await httpClient.PostAsync($"{authority}/connect/token", content);
+            var response = await httpClient.PostAsync($"{config.OAuth.Authority}/connect/token", content);
 
             if (response.IsSuccessStatusCode) {
                 var result = await response.Content.ReadAsStringAsync();
@@ -162,7 +158,7 @@ namespace myFastway.ApiClient.Tests
                     jsonHeader.Parameters.Add(new NameValueHeaderValue("api-version", apiVersion));
 
                 client.DefaultRequestHeaders.Accept.Add(jsonHeader);
-                client.BaseAddress = new Uri(baseAddress);
+                client.BaseAddress = new Uri(config.Api.BaseAddress);
                 var accessToken = await getAccessToken();
                 client.SetBearerToken(accessToken);
 
@@ -176,6 +172,27 @@ namespace myFastway.ApiClient.Tests
 
                 return retVal;
             }
+        }
+
+
+        /// <summary>
+        /// For a given model, loads a json object with the expected results from disk.  Before a test referencing this function will pass, a 'local' copy
+        /// of the file will have to be created by copying <typeparamref name="T"/>.json to <typeparamref name="T"/>.local.json populating the default
+        /// object with the expected results.
+        /// </summary>
+        /// <typeparam name="T">The type of the model to be loaded from file</typeparam>
+        /// <param name="filename">The phyiscal file name (excluding the .local extension)</param>
+        /// <returns></returns>
+        protected async Task<T> LoadModelFromFile<T>(string filename) {
+
+            string localFileName = $"{filename}.local.json";
+
+            if (File.Exists(localFileName)) {
+                var serializedObject = await File.ReadAllTextAsync(localFileName);
+                return JsonConvert.DeserializeObject<T>(serializedObject);
+            }
+            
+            throw new FileNotFoundException($"Cannot find file {localFileName}.  Please copy {filename}.json to a new file {localFileName} poplulating the model with the expected results ", localFileName);
         }
     }
 }

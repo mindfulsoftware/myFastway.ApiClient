@@ -17,12 +17,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="appsettings-local.json">
+    <None Update="appsettings.local.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="xcopy &quot;$(ProjectDir)Data\*local.json&quot; &quot;$(TargetDir)&quot; /Y" />
+  </Target>
 
 </Project>

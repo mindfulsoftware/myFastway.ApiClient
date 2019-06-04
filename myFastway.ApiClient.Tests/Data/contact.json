@@ -1,0 +1,24 @@
+{
+  "contactId": 0,
+  "code": "",
+  "businessName": "",
+  "contactName": "",
+  "displayName": "",
+  "phoneNumber": "",
+  "email": "",
+  "instructions": "",
+  "address": {
+    "addressId": 0,
+    "streetAddress": "",
+    "additionalDetails": "",
+    "locality": "",
+    "stateOrProvince": "",
+    "postalCode": "",
+    "country": "",
+    "userCreated": false,
+    "hash": "",
+    "placeId": "",
+    "lat": 0.000000,
+    "lng": 0.000000
+  }
+}
