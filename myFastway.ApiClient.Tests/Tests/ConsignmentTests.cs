@@ -52,11 +52,33 @@ namespace myFastway.ApiClient.Tests.Tests
         }
 
         [Fact]
+        public async Task CanConsignResellerWithExistingContacts()
+        {
+            var consignment = GetResellerConsignment();
+            var fromPersistedContact = await PostSingle<ContactModel>(ContactTests.BASE_ROUTE, consignment.From);
+            consignment.From = new ContactModel { ContactId = fromPersistedContact.ContactId };
+            var toPersistedContact = await PostSingle<ContactModel>(ContactTests.BASE_ROUTE, consignment.To);
+            consignment.To= new ContactModel { ContactId = toPersistedContact.ContactId };
+            var persistedConsignment = await PostSingle<PersistedConsignmentModel>(BASE_ROUTE, consignment);
+            Assert.True(persistedConsignment.ConId > 0);
+        }
+
+        [Fact]
         public async Task CanConsignReceiverPays()
         {
             var consignment = GetReceiverPaysConsignment();
             var result = await PostSingle<PersistedConsignmentModel>(BASE_ROUTE, consignment);
             Assert.True(result?.ConId > 0);
+        }
+
+        [Fact]
+        public async Task CanConsignReceiverPaysWithExistingContact()
+        {
+            var consignment = GetReceiverPaysConsignment();
+            var persistedContact = await PostSingle<ContactModel>(ContactTests.BASE_ROUTE, consignment.From);
+            consignment.From = new ContactModel { ContactId = persistedContact.ContactId };
+            var persistedConsignment = await PostSingle<PersistedConsignmentModel>(BASE_ROUTE, consignment);
+            Assert.True(persistedConsignment.ConId > 0);
         }
 
         [Fact]
