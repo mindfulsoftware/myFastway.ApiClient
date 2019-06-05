@@ -221,7 +221,7 @@ namespace myFastway.ApiClient.Tests.Tests
         private CreateConsignmentModel GetReceiverPaysConsignment()
         {
             var result = GetResellerConsignment();
-            result.ConType = ConType.ReceiverPays;
+            result.ConTypeId = ConTypeId.ReceiverPays;
             result.To = null;
             return result;
         }
@@ -229,7 +229,7 @@ namespace myFastway.ApiClient.Tests.Tests
         private CreateConsignmentModel GetResellerConsignment()
         {
             var result = GetStandardConsignment();
-            result.ConType = ConType.Reseller;
+            result.ConTypeId = ConTypeId.Reseller;
             result.From = new ContactModel
             {
                 ContactName = "Sarah Sender",
@@ -252,7 +252,7 @@ namespace myFastway.ApiClient.Tests.Tests
         {
             var result = new CreateConsignmentModel
             {
-                ConType = ConType.Standard,
+                ConTypeId = ConTypeId.Standard,
                 To = new ContactModel
                 {
                     ContactName = "Tony Receiver",
