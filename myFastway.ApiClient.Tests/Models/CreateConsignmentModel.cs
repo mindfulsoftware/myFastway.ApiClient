@@ -31,6 +31,7 @@ namespace myFastway.ApiClient.Tests.Models
         public decimal Length { get; set; }
         public decimal Width { get; set; }
         public decimal Height { get; set; }
+        public string Label { get; set; }
     }
 
     public class CreateConsignmentServiceModel
