@@ -13,6 +13,7 @@ namespace myFastway.ApiClient.Tests.Models
         public string InstructionsPrivate { get; set; }
         public string ExternalRef1 { get; set; }
         public string ExternalRef2 { get; set; }
+        public string FromInstructionsPublic { get; set; }
         public PickupType PickupTypeId { get; set; }
         public PickupDetails PickupDetails { get; set; }
         public ContactModel From { get; set; }

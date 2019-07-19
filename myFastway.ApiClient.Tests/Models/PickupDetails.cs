@@ -8,6 +8,13 @@ namespace myFastway.ApiClient.Tests.Models
         public PickupCycle PreferredPickupCycleId { get; set; }
     }
 
+    public class UpdatePickupDetailsRequest
+    {
+        public DateTime PreferredPickupDate { get; set; }
+        public PickupCycle PreferredPickupCycleId { get; set; }
+        public string FromInstructionsPublic { get; set; }
+    }
+
     public enum PickupType
     {
         Required = 1,

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace myFastway.ApiClient.Tests.Models
 {
@@ -15,6 +14,7 @@ namespace myFastway.ApiClient.Tests.Models
         public decimal Price { get; set; }
         public decimal Tax { get; set; }
         public decimal Total { get; set; }
+        public string FromInstructionsPublic { get; set; }
         public PickupType? PickupTypeId { get; set; }
         public PickupDetails PickupDetails { get; set; }
         public IEnumerable<CreateConsignmentItemModel> Items { get; set; }

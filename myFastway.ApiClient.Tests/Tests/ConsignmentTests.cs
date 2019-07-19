@@ -61,6 +61,30 @@ namespace myFastway.ApiClient.Tests.Tests
         }
 
         [Fact]
+        public async Task CanSetFuturePickupDates()
+        {
+            var consignment = GetStandardConsignment();
+            consignment.PickupTypeId = PickupType.Future;
+            consignment.FromInstructionsPublic = "Initial pickup instructions";
+            var result = await PostSingle<PersistedConsignmentModel>(BASE_ROUTE, consignment);
+            Assert.True(result.ConId > 0);
+            Assert.Equal(consignment.FromInstructionsPublic, result.FromInstructionsPublic);
+            var updateRequest = new UpdatePickupDetailsRequest
+            {
+                PreferredPickupDate = DateTime.Today.AddDays(7),
+                PreferredPickupCycleId = PickupCycle.PM,
+                FromInstructionsPublic = "Updated pickup instructions"
+            };
+            await PostSingle($"{BASE_ROUTE}/{result.ConId}/pickup-details", updateRequest);
+            var loadedConsignment = await GetSingle<PersistedConsignmentModel>($"{BASE_ROUTE}/{result.ConId}");
+            Assert.NotNull(loadedConsignment);
+            Assert.NotNull(loadedConsignment.PickupDetails);
+            Assert.Equal(updateRequest.PreferredPickupDate, loadedConsignment.PickupDetails.PreferredPickupDate);
+            Assert.Equal(updateRequest.PreferredPickupCycleId, loadedConsignment.PickupDetails.PreferredPickupCycleId);
+            Assert.Equal(updateRequest.FromInstructionsPublic, loadedConsignment.FromInstructionsPublic);
+        }
+
+        [Fact]
         public async Task CanConsignReseller()
         {
             var consignment = GetResellerConsignment();
