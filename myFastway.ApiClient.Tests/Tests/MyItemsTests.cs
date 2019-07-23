@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Xunit;
 
-namespace myFastway.ApiClient.Tests.Tests {
+namespace myFastway.ApiClient.Tests {
     public class MyItemsTests : TestBase {
         public const string BASE_ROUTE = "my-items";
 

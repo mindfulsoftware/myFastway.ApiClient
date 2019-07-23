@@ -3,7 +3,7 @@ using System;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace myFastway.ApiClient.Tests.Tests {
+namespace myFastway.ApiClient.Tests {
     public class AccountsTests : TestBase {
         public const string BASE_ROUTE = "accounts";
 

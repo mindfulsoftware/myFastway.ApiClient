@@ -7,12 +7,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace myFastway.ApiClient.Tests.Tests
+namespace myFastway.ApiClient.Tests
 {
-    public class ConsignmentTests : TestBase
+    public class ConsignmentTests : ConsignmentTestsBase 
     {
-        const string BASE_ROUTE = "consignments";
-
         [Fact]
         public async Task CanQuote()
         {
@@ -22,25 +20,11 @@ namespace myFastway.ApiClient.Tests.Tests
         }
 
         [Fact]
-        public async Task CanQuoteReseller()
-        {
-            var consignment = GetResellerConsignment();
-            var quote = await PostSingle<QuoteModel>($"{BASE_ROUTE}/quote", consignment);
-            Assert.True(quote?.Total > 0);
-        }
-
-        [Fact]
-        public async Task CanQuoteReceiverPays()
-        {
-            var consignment = GetReceiverPaysConsignment();
-            var quote = await PostSingle<QuoteModel>($"{BASE_ROUTE}/quote", consignment);
-            Assert.True(quote.Total > 0);
-        }
-
-        [Fact]
         public async Task CanConsign()
         {
             var persistedConsignment = await Consign();
+
+            Assert.True(persistedConsignment.ConId > 0);
         }
 
         [Fact]
@@ -61,7 +45,7 @@ namespace myFastway.ApiClient.Tests.Tests
         }
 
         [Fact]
-        public async Task CanSetFuturePickupDates()
+        public async Task CanConsignWithFuturePickupDates()
         {
             var consignment = GetStandardConsignment();
             consignment.PickupTypeId = PickupType.Future;
@@ -69,6 +53,7 @@ namespace myFastway.ApiClient.Tests.Tests
             var result = await PostSingle<PersistedConsignmentModel>(BASE_ROUTE, consignment);
             Assert.True(result.ConId > 0);
             Assert.Equal(consignment.FromInstructionsPublic, result.FromInstructionsPublic);
+
             var updateRequest = new UpdatePickupDetailsRequest
             {
                 PreferredPickupDate = DateTime.Today.AddDays(7),
@@ -77,6 +62,7 @@ namespace myFastway.ApiClient.Tests.Tests
             };
             await PostSingle($"{BASE_ROUTE}/{result.ConId}/pickup-details", updateRequest);
             var loadedConsignment = await GetSingle<PersistedConsignmentModel>($"{BASE_ROUTE}/{result.ConId}");
+
             Assert.NotNull(loadedConsignment);
             Assert.NotNull(loadedConsignment.PickupDetails);
             Assert.Equal(updateRequest.PreferredPickupDate, loadedConsignment.PickupDetails.PreferredPickupDate);
@@ -84,69 +70,8 @@ namespace myFastway.ApiClient.Tests.Tests
             Assert.Equal(updateRequest.FromInstructionsPublic, loadedConsignment.FromInstructionsPublic);
         }
 
-        [Fact]
-        public async Task CanConsignReseller()
-        {
-            var consignment = GetResellerConsignment();
-            var result = await PostSingle<PersistedConsignmentModel>(BASE_ROUTE, consignment);
-            Assert.True(result?.ConId > 0);
-        }
 
-        [Fact]
-        public async Task CanConsignResellerWithExistingContacts()
-        {
-            var consignment = GetResellerConsignment();
-            var fromPersistedContact = await PostSingle<ContactModel>(ContactTests.BASE_ROUTE, consignment.From);
-            consignment.From = new ContactModel { ContactId = fromPersistedContact.ContactId };
-            var toPersistedContact = await PostSingle<ContactModel>(ContactTests.BASE_ROUTE, consignment.To);
-            consignment.To= new ContactModel { ContactId = toPersistedContact.ContactId };
-            var persistedConsignment = await PostSingle<PersistedConsignmentModel>(BASE_ROUTE, consignment);
-            Assert.True(persistedConsignment.ConId > 0);
-        }
 
-        [Fact]
-        public async Task CanConsignReceiverPays()
-        {
-            var consignment = GetReceiverPaysConsignment();
-            var result = await PostSingle<PersistedConsignmentModel>(BASE_ROUTE, consignment);
-            Assert.True(result?.ConId > 0);
-        }
-
-        [Fact]
-        public async Task CanConsignReceiverPaysWithExistingContact()
-        {
-            var consignment = GetReceiverPaysConsignment();
-            var persistedContact = await PostSingle<ContactModel>(ContactTests.BASE_ROUTE, consignment.From);
-            consignment.From = new ContactModel { ContactId = persistedContact.ContactId };
-            var persistedConsignment = await PostSingle<PersistedConsignmentModel>(BASE_ROUTE, consignment);
-            Assert.True(persistedConsignment.ConId > 0);
-        }
-
-        [Fact]
-        public async Task CanConsignReturns()
-        {
-            var consignment = await GetReturnsConsignment();
-            var persistedConsignment = await PostSingle<PersistedConsignmentModel>(BASE_ROUTE, consignment);
-            Assert.True(persistedConsignment.ConId > 0);
-        }
-
-        [Fact]
-        public async Task CanConsignReturnsWithOverrides()
-        {
-            var consignment = await GetReturnsConsignment();
-            var item = consignment.Items.First();
-            item.Length = 35;
-            item.Width = 35;
-            item.Height = 35;
-            item.WeightDead = 11;
-            var persistedConsignment = await PostSingle<PersistedConsignmentModel>(BASE_ROUTE, consignment);
-            Assert.True(persistedConsignment.ConId > 0);
-            var persistedItem = persistedConsignment.Items.First();
-            Assert.True(persistedItem.Length == 35);
-            Assert.True(persistedItem.Width == 35);
-            Assert.True(persistedItem.Height == 35);
-            Assert.True(persistedItem.WeightDead == 11);
-        }
 
         [Fact]
         public async Task CanConsignWithServices()
@@ -167,7 +92,10 @@ namespace myFastway.ApiClient.Tests.Tests
                     }
                 };
             }
-            await Consign(consignment);
+
+            var persistedConsignment = await Consign(consignment);
+
+            Assert.True(persistedConsignment.ConId > 0);
         }
 
         [Fact]
@@ -175,6 +103,8 @@ namespace myFastway.ApiClient.Tests.Tests
         {
             var persistedConsignment = await Consign();
             var loadedConsignment = await GetSingle<PersistedConsignmentModel>($"{BASE_ROUTE}/{persistedConsignment.ConId}");
+
+            Assert.True(persistedConsignment.ConId > 0);
             Assert.NotNull(loadedConsignment);
             Assert.Equal(persistedConsignment.ConId, loadedConsignment.ConId);
         }
@@ -204,9 +134,12 @@ namespace myFastway.ApiClient.Tests.Tests
             for (var i = 0; i < 3; i++)
             {
                 var persistedConsignment = await Consign();
+
+                Assert.True(persistedConsignment.ConId > 0);
             }
             var dateFormat = DateTime.Now.ToString("yyyy-MM-dd");
             var listItems = await GetCollection<ConsignmentListItem>($"{BASE_ROUTE}?fromDate={dateFormat}&toDate={dateFormat}&pageNumber=0&pageSize=10");
+
             Assert.True(listItems.Count() >= 3);
         }
 
@@ -214,6 +147,9 @@ namespace myFastway.ApiClient.Tests.Tests
         public async Task GetLabelsForConsignment()
         {
             var persistedConsignment = await Consign();
+
+            Assert.True(persistedConsignment.ConId > 0);
+
             await WriteLabelsPDF(persistedConsignment.ConId, "A4");
             await WriteLabelsPDF(persistedConsignment.ConId, "4x6");
         }
@@ -222,6 +158,9 @@ namespace myFastway.ApiClient.Tests.Tests
         public async Task GetLabelsForConsignmentLabels()
         {
             var persistedConsignment = await Consign();
+
+            Assert.True(persistedConsignment.ConId > 0);
+
             var label = persistedConsignment.Items.First().Label;
             await WriteLabelsPDF(persistedConsignment.ConId, "A4", label);
             await WriteLabelsPDF(persistedConsignment.ConId, "4x6", label);
@@ -231,6 +170,7 @@ namespace myFastway.ApiClient.Tests.Tests
         public async Task DeleteAndUndeleteCycle()
         {
             var persistedConsignment = await Consign();
+            Assert.True(persistedConsignment.ConId > 0);
 
             var deletedReasons = await GetCollection<DeletedReasonModel>($"{BASE_ROUTE}/deleted-reasons");
             Assert.NotEmpty(deletedReasons);
@@ -253,6 +193,8 @@ namespace myFastway.ApiClient.Tests.Tests
         public async Task GetPending()
         {
             var persistedConsignment = await Consign();
+
+            Assert.True(persistedConsignment.ConId > 0);
 
             var pending = await GetCollection<ConsignmentSearchItem>($"{BASE_ROUTE}/pending?pageNumber=0&pageSize=10");
             Assert.NotEmpty(pending);
@@ -284,7 +226,10 @@ namespace myFastway.ApiClient.Tests.Tests
                     MyItemId = persistedMyItem.MyItemId
                 },
             };
-            await Consign(consignment);
+
+            var persistedConsignment = await Consign(consignment);
+
+            Assert.True(persistedConsignment.ConId > 0);
         }
 
         private async Task WriteLabelsPDF(int conId, string pageSize, string label = null)
@@ -299,100 +244,5 @@ namespace myFastway.ApiClient.Tests.Tests
             Debug.WriteLine($"{pageSize} Labels written to {path}");
         }
 
-        private async Task<PersistedConsignmentModel> Consign(CreateConsignmentModel consignment = null)
-        {
-            consignment = consignment ?? GetStandardConsignment();
-            var result = await PostSingle<PersistedConsignmentModel>(BASE_ROUTE, consignment);
-            Assert.True(result.ConId > 0);
-            return result;
-        }
-
-        private CreateConsignmentModel GetReceiverPaysConsignment()
-        {
-            var result = GetResellerConsignment();
-            result.ConTypeId = ConTypeId.ReceiverPays;
-            result.To = null;
-            return result;
-        }
-
-        private CreateConsignmentModel GetResellerConsignment()
-        {
-            var result = GetStandardConsignment();
-            result.ConTypeId = ConTypeId.Reseller;
-            result.From = new ContactModel
-            {
-                ContactName = "Sarah Sender",
-                BusinessName = "Sarahs' Stuff",
-                Email = "sarah@sarahs-stuff.com.au",
-                PhoneNumber = "0400 000 111",
-                Address = new AddressModel
-                {
-                    StreetAddress = "333 Collins St",
-                    Locality = "Melbourne",
-                    PostalCode = "3000",
-                    StateOrProvince = "VIC",
-                    Country = "AU"
-                },
-            };
-            return result;
-        }
-
-        private async Task<CreateConsignmentModel> GetReturnsConsignment()
-        {
-            var persistedConsignment = await Consign();
-            var result = new CreateConsignmentModel
-            {
-                ConTypeId = ConTypeId.Returns,
-                Items = new List<CreateConsignmentItemModel>
-                {
-                    new CreateConsignmentItemModel { Label = persistedConsignment.Items.First().Label }
-                }
-            };
-            return result;
-        }
-
-        private CreateConsignmentModel GetStandardConsignment()
-        {
-            var result = new CreateConsignmentModel
-            {
-                ConTypeId = ConTypeId.Standard,
-                To = new ContactModel
-                {
-                    ContactName = "Tony Receiver",
-                    BusinessName = "Tony's Tools",
-                    Email = "tony@tonystools.com.au",
-                    PhoneNumber = "0400 123 456",
-                    Address = new AddressModel
-                    {
-                        StreetAddress = "73 Katoomba St",
-                        Locality = "Katoomba",
-                        PostalCode = "2780",
-                        StateOrProvince = "NSW",
-                        Country = "AU"
-                    },
-                },
-                Items = new[]
-                {
-                    new CreateConsignmentItemModel
-                    {
-                        Quantity = 1,
-                        PackageType = "P",
-                        Reference = "Parcel",
-                        WeightDead = 5,
-                        Length = 25,
-                        Width = 10,
-                        Height = 10
-                    },
-                    new CreateConsignmentItemModel
-                    {
-                        Quantity = 1,
-                        PackageType = "S",
-                        Reference = "Satchel",
-                        SatchelSize = "A4"
-                    }
-                }
-            };
-            return result;
-        }
     }
 }
