@@ -45,6 +45,26 @@ namespace myFastway.ApiClient.Tests
         }
 
         [Fact]
+        public async Task CannotSetPickupDateGreaterThan30Days() {
+
+            var ex = await Assert.ThrowsAsync<BadRequestException>(async () => {
+
+                var consignment = GetStandardConsignment();
+                consignment.PickupTypeId = PickupType.Required;
+                consignment.PickupDetails = new PickupDetails {
+                    PreferredPickupDate = DateTime.Today.AddDays(31),
+                    PreferredPickupCycleId = PickupCycle.AM
+                };
+
+                var result = await PostSingle<PersistedConsignmentModel>(BASE_ROUTE, consignment);
+            });
+
+            Assert.Single(ex.Errors);
+            Assert.Equal("CON_COL_DATE", ex.Errors[0].Code);
+
+        }
+
+        [Fact]
         public async Task CanConsignWithFuturePickupDates()
         {
             var consignment = GetStandardConsignment();

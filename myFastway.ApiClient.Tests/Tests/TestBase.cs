@@ -5,7 +5,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -129,14 +128,19 @@ namespace myFastway.ApiClient.Tests
         async Task<T> ParseResponse<T>(HttpResponseMessage response)
         {
             var responseBody = await response.Content.ReadAsStringAsync();
-            Debug.WriteLine($"Response Body:\r\n{responseBody}");
+            var jobj = JObject.Parse(responseBody);
+
             if (response.IsSuccessStatusCode)
-            {
-                var jobj = JObject.Parse(responseBody);
                 return jobj["data"].ToObject<T>();
+            
+            if(response.StatusCode == HttpStatusCode.BadRequest) {
+                var errors = jobj["errors"].ToObject<List<ErrorModel>>();
+                throw new BadRequestException(errors);
             }
+
             return default(T);
         }
+
 
 
         /// <summary>
@@ -193,6 +197,14 @@ namespace myFastway.ApiClient.Tests
             }
             
             throw new FileNotFoundException($"Cannot find file {localFileName}.  Please copy {filename}.json to a new file {localFileName} poplulating the model with the expected results ", localFileName);
+        }
+    }
+
+    public class BadRequestException : Exception {
+        public List<ErrorModel> Errors { get; }
+
+        public BadRequestException(List<ErrorModel> errors) {
+            Errors = errors;
         }
     }
 }
