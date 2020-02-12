@@ -1,5 +1,4 @@
 ﻿using myFastway.ApiClient.Tests.Models;
-using System;
 using System.Threading.Tasks;
 using Xunit;
 

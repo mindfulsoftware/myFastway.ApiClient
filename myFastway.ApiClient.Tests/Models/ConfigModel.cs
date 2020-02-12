@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
 
 namespace myFastway.ApiClient.Tests.Models {
     public class ConfigModel {
@@ -17,12 +16,14 @@ namespace myFastway.ApiClient.Tests.Models {
         public string ClientId { get; set; }
         public string Secret { get; set; }
         public string Scope { get; set; }
+        public bool RequireHttps { get; set; }
 
         public OAuthConfig(IConfigurationRoot config) {
             Authority = config["oauth:authority"];
             ClientId = config["oauth:client_id"];
             Secret = config["oauth:secret"];
             Scope = config["oauth:scope"];
+            RequireHttps = bool.Parse(config["oauth:requireHttps"]);
         }
     }
 

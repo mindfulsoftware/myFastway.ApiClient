@@ -41,7 +41,7 @@ namespace myFastway.ApiClient.Tests
         protected async Task<string> GetClientCredentialDiscovery() {
 
             var discoveryClient = new DiscoveryClient(config.OAuth.Authority) {
-                Policy = new DiscoveryPolicy { RequireHttps = true }
+                Policy = new DiscoveryPolicy { RequireHttps = config.OAuth.RequireHttps }
             };
 
             var disco = await discoveryClient.GetAsync();
