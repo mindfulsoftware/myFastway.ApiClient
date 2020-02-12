@@ -1,5 +1,4 @@
 ﻿using myFastway.ApiClient.Tests.Models.Internationals;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -80,9 +79,30 @@ namespace myFastway.ApiClient.Tests.Tests.Internationals {
                 Country = "AU",
             };
 
-            var errors = await PostSingle<IEnumerable<string>>($"{BASE_ROUTE}/validate", model);
+            var response = await PostSingle($"{BASE_ROUTE}/validate", model);
 
-            Assert.Empty(errors);
+            Assert.True(response.IsSuccessStatusCode);
+        }
+
+        [Fact]
+        public async Task UnknownAddressFailsValidation()
+        {
+            var model = new
+            {
+                AddressLine1 = "491 Kent St",
+                AddressLine2 = "",
+                AddressLine3 = "",
+                City = "SydNEE",
+                StateOrProvince = "NSW",
+                PostalCode = "2000",
+                Country = "AU",
+            };
+
+
+            var response = await PostSingle($"{BASE_ROUTE}/validate", model);
+            var errors = await ParseErrors(response);
+
+            Assert.NotEmpty(errors);
         }
     }
 }

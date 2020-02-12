@@ -141,7 +141,15 @@ namespace myFastway.ApiClient.Tests
             return default(T);
         }
 
+        protected async Task<IList<ErrorModel>> ParseErrors(HttpResponseMessage response)
+        {
+            if (response.StatusCode != HttpStatusCode.BadRequest)
+                return null;
 
+            var responseBody = await response.Content.ReadAsStringAsync();
+            var jobj = JObject.Parse(responseBody);
+            return jobj["errors"].ToObject<List<ErrorModel>>();
+        }
 
         /// <summary>
         /// Make a call to the api, setting the required headers and bearer token.  In the case where the token has expired, it renews
