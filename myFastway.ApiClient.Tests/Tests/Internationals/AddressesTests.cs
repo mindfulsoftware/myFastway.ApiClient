@@ -92,12 +92,11 @@ namespace myFastway.ApiClient.Tests.Tests.Internationals {
                 AddressLine1 = "491 Kent St",
                 AddressLine2 = "",
                 AddressLine3 = "",
-                City = "SydNEE",
+                City = "SydNEE", // <<== no such city.
                 StateOrProvince = "NSW",
                 PostalCode = "2000",
                 Country = "AU",
             };
-
 
             var response = await PostSingle($"{BASE_ROUTE}/validate", model);
             var errors = await ParseErrors(response);

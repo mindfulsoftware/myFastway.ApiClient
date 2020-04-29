@@ -105,6 +105,13 @@ namespace myFastway.ApiClient.Tests
             return result;
         }
 
+        protected async Task<T> PutSingle<T>(string url, object payload, string apiVersion = "1.0") {
+
+            var response = await PutSingle(url, payload, apiVersion);
+            var result = await ParseResponse<T>(response);
+            return result;
+        }
+
         protected async Task<IEnumerable<T>> GetCollection<T>(string url, string apiVersion = "1.0") {
 
             var response = await CallApi(GetClientCredentialDiscovery, async (client) => await client.GetAsync($"api/{url}"), apiVersion);
