@@ -41,7 +41,7 @@ namespace myFastway.ApiClient.Tests
         protected async Task<string> GetClientCredentialDiscovery() {
 
             var discoveryClient = new DiscoveryClient(config.OAuth.Authority) {
-                Policy = new DiscoveryPolicy { RequireHttps = true }
+                Policy = new DiscoveryPolicy { RequireHttps = config.OAuth.RequireHttps }
             };
 
             var disco = await discoveryClient.GetAsync();
@@ -105,6 +105,13 @@ namespace myFastway.ApiClient.Tests
             return result;
         }
 
+        protected async Task<T> PutSingle<T>(string url, object payload, string apiVersion = "1.0") {
+
+            var response = await PutSingle(url, payload, apiVersion);
+            var result = await ParseResponse<T>(response);
+            return result;
+        }
+
         protected async Task<IEnumerable<T>> GetCollection<T>(string url, string apiVersion = "1.0") {
 
             var response = await CallApi(GetClientCredentialDiscovery, async (client) => await client.GetAsync($"api/{url}"), apiVersion);
@@ -141,7 +148,15 @@ namespace myFastway.ApiClient.Tests
             return default(T);
         }
 
+        protected async Task<IList<ErrorModel>> ParseErrors(HttpResponseMessage response)
+        {
+            if (response.StatusCode != HttpStatusCode.BadRequest)
+                return null;
 
+            var responseBody = await response.Content.ReadAsStringAsync();
+            var jobj = JObject.Parse(responseBody);
+            return jobj["errors"].ToObject<List<ErrorModel>>();
+        }
 
         /// <summary>
         /// Make a call to the api, setting the required headers and bearer token.  In the case where the token has expired, it renews
