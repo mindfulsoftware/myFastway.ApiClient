@@ -10,14 +10,23 @@ These instructions will get you a copy of the project up and running on your loc
 
 This project is created using [ASP.NET Core 2.1](https://docs.microsoft.com/en-us/aspnet/core/?view=aspnetcore-2.1) Unit test project
 
-Once cloned, the appSettings.json document will have to be updated with your **client_id** and **secret** obtained from the website.  Finally the **base-address** of the api you're connecting to will have to be provided.  The current production api's are
+Once cloned, the appSettings.json document will have to be updated with your **client_id** and **secret** obtained from the website.  A token can be obtained from the Security Token server endpoints below
 
+Country | Endpoint  | Verb | Paging | Description
+:------:|:-------- |--------|:------:|:-----------
+AU | https://identity.aramexconnect.com.au/connect/token | POST|| returns bearer token
+NZ | https://identity.aramexconnect.co.nz/connect/token | POST|| returns bearer token
+
+
+Finally the **base-address** of the api you're connecting to will have to be provided.  The current production api's are:
 
 Resource | Country |Description| base-address
 :-------|:-------| :-------| :-------
-Token Server | [All countries] | oauth authority | https://identity.fastway.org/connect/token
-myFastway API |Australia | api base address | https://api.myfastway.com.au
-myFastway API |New Zealand | api base address | https://api.myfastway.co.nz
+aramexConnect API |Australia | api base address | https://api.aramexconnect.com.au
+aramexConnect API |New Zealand | api base address | https://api.aramexconnect.co.nz
+
+
+
 
 
 ```json
