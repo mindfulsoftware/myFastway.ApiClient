@@ -32,7 +32,7 @@ aramexConnect API |New Zealand | api base address | https://api.aramexconnect.co
 ```json
 {
   "oauth": {
-    "authority": "https://identity.fastway.org/connect/token",
+    "authority": "https://identity.aramexconnect.com.au/connect/token",
     "client_id": "<YOUR CLIENT_ID>",
     "secret": "<YOUR SECRET>",
     "scope": ""
